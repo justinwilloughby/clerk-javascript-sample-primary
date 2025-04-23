@@ -15,11 +15,12 @@ declare global {
 }
 
 const clerk = new Clerk(clerkPubKey);
+
 window.Clerk = clerk;
 
 // Wrap async code in a function instead of using top-level await
 (async function initializeClerk() {
-  await clerk.load();
+  await window.Clerk?.load();
   
   if (clerk.user) {
     document.getElementById('app')!.innerHTML = `
@@ -31,12 +32,35 @@ window.Clerk = clerk;
     clerk.mountUserButton(userButtonDiv as HTMLDivElement)
   } else {
     document.getElementById('app')!.innerHTML = `
-      <div id="sign-in"></div>
+      <button id="sign-in">Sign In</button>
     `
     
-    const signInDiv = document.getElementById('sign-in')
+    const signInButton = document.getElementById('sign-in')
+
+    signInButton?.addEventListener('click', async () => {
+      const phoneNumber = "+17652024451";
+
+      await window.Clerk?.client?.signIn.create({
+        strategy: "phone_code",
+        identifier: phoneNumber,
+      })
+
+      // Prompt for code
+      const code = prompt("Enter the code you received:")
+
+      if (!code) {
+        console.error("No code provided")
+        return
+      }
+
+      await window.Clerk?.client?.signIn.attemptFirstFactor({
+        strategy: "phone_code",
+        code,
+      });
+
+      console.log("Signed in")
+    })
     
-    clerk.mountSignIn(signInDiv as HTMLDivElement)
   }
 })().catch(error => {
   console.error("Failed to initialize Clerk:", error);
