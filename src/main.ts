@@ -20,8 +20,21 @@ window.Clerk = clerk;
 
 // Helper function to get URL parameters
 function getUrlParameter(name: string): string | null {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(name);
+  // Check if the parameter is in the regular query string
+  let urlParams = new URLSearchParams(window.location.search);
+  let param = urlParams.get(name);
+  
+  // If not found in regular query string, check in the hash fragment
+  if (!param && window.location.hash) {
+    // Extract the query part after the hash and '?'
+    const hashQuery = window.location.hash.split('?')[1];
+    if (hashQuery) {
+      urlParams = new URLSearchParams(hashQuery);
+      param = urlParams.get(name);
+    }
+  }
+  
+  return param;
 }
 
 (async function initializeClerk() {
@@ -30,6 +43,8 @@ function getUrlParameter(name: string): string | null {
   });
   
   const redirectUrl = getUrlParameter('redirect_url');
+
+  console.log(redirectUrl);
   
   if (clerk.user) {
     document.getElementById('app')!.innerHTML = `
