@@ -18,11 +18,18 @@ const clerk = new Clerk(clerkPubKey);
 
 window.Clerk = clerk;
 
-// Wrap async code in a function instead of using top-level await
+// Helper function to get URL parameters
+function getUrlParameter(name: string): string | null {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
 (async function initializeClerk() {
   await window.Clerk?.load({
-    allowedRedirectOrigins: ["https://www.securitysaas.xyz"]
+    allowedRedirectOrigins: ["https://www.securitysaas.xyz", "https://securitysaas.xyz"]
   });
+  
+  const redirectUrl = getUrlParameter('redirect_url');
   
   if (clerk.user) {
     document.getElementById('app')!.innerHTML = `
@@ -32,6 +39,10 @@ window.Clerk = clerk;
     const userButtonDiv = document.getElementById('user-button')
     
     clerk.mountUserButton(userButtonDiv as HTMLDivElement)
+    
+    if (redirectUrl) {
+      clerk.navigate(redirectUrl);
+    }
   } else {
     document.getElementById('app')!.innerHTML = `
       <button id="sign-in">Sign In</button>
@@ -55,14 +66,22 @@ window.Clerk = clerk;
         return
       }
 
-      await window.Clerk?.client?.signIn.attemptFirstFactor({
-        strategy: "phone_code",
-        code,
-      });
+      try {
+        // Attempt to sign in
+        const result = await window.Clerk?.client?.signIn.attemptFirstFactor({
+          strategy: "phone_code",
+          code,
+        });
 
-      console.log("Signed in")
+        console.log("Signed in successfully");
+
+        if (redirectUrl) {
+          clerk.navigate(redirectUrl);
+        }
+      } catch (error) {
+        console.error("Sign in failed:", error);
+      }
     })
-    
   }
 })().catch(error => {
   console.error("Failed to initialize Clerk:", error);
