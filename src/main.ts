@@ -20,7 +20,9 @@ window.Clerk = clerk;
 
 // Wrap async code in a function instead of using top-level await
 (async function initializeClerk() {
-  await window.Clerk?.load();
+  await window.Clerk?.load({
+    allowedRedirectOrigins: ["https://www.securitysaas.xyz"]
+  });
   
   if (clerk.user) {
     document.getElementById('app')!.innerHTML = `
