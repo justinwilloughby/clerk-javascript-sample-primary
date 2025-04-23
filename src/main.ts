@@ -31,12 +31,18 @@ window.Clerk = clerk;
     clerk.mountUserButton(userButtonDiv as HTMLDivElement)
   } else {
     document.getElementById('app')!.innerHTML = `
-      <div id="sign-in"></div>
+      <div class="auth-container">
+        <div id="sign-in"></div>
+        <div class="divider">or</div>
+        <div id="sign-up"></div>
+      </div>
     `
     
     const signInDiv = document.getElementById('sign-in')
+    const signUpDiv = document.getElementById('sign-up')
     
     clerk.mountSignIn(signInDiv as HTMLDivElement)
+    clerk.mountSignUp(signUpDiv as HTMLDivElement)
   }
 })().catch(error => {
   console.error("Failed to initialize Clerk:", error);
