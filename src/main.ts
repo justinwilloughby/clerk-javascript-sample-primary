@@ -68,7 +68,7 @@ function getUrlParameter(name: string): string | null {
 
       try {
         // Attempt to sign in
-        const result = await window.Clerk?.client?.signIn.attemptFirstFactor({
+        await window.Clerk?.client?.signIn.attemptFirstFactor({
           strategy: "phone_code",
           code,
         });
